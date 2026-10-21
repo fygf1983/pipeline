@@ -2,7 +2,7 @@ name: Scan Agendado - Vigilancia Continua
 
 on:
   schedule:
-    - cron: '0 3 * * *'   # todos os dias as 03:00 UTC
+    - cron: '0 3 * * *'   # Todos os dias às 03:00 UTC
   workflow_dispatch: {}
 
 permissions:
@@ -13,17 +13,49 @@ jobs:
   revarredura-segredos:
     name: "Revarredura de Segredos (Gitleaks)"
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+
+      - name: Executar Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+
+        # ==================================================================
+        # CONFIGURACAO EXCLUSIVA PARA AMBIENTE DE LABORATORIO / TREINAMENTO
+        #
+        # Este repositorio contem exemplos didaticos relacionados a
+        # vulnerabilidades, segredos expostos e demonstracoes de praticas
+        # DevSecOps. Alguns arquivos sao mantidos intencionalmente para fins
+        # de estudo e validacao de ferramentas de seguranca.
+        #
+        # O parametro "continue-on-error" foi habilitado para evitar falhas
+        # recorrentes da execucao agendada e consequentes notificacoes
+        # diarias por e-mail durante as atividades de laboratorio.
+        #
+        # IMPORTANTE:
+        # Em uma esteira corporativa real esta configuracao NAO deve ser
+        # utilizada. O comportamento recomendado e:
+        #
+        # 1. Remover segredos do codigo e do historico Git.
+        # 2. Corrigir imediatamente qualquer vazamento identificado.
+        # 3. Manter o pipeline interrompendo a execucao em caso de achados.
+        # 4. Tratar cada deteccao como incidente de seguranca.
+        # 5. Exigir aprovacao antes da promocao para ambientes produtivos.
+        #
+        # Esta excecao existe exclusivamente para fins educacionais e de
+        # demonstracao de vigilancia continua. Para pegar o yml devido, consultar o repositorio do prof Fabio no github.
+        # ==================================================================
+        continue-on-error: true
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   revarredura-dependencias:
     name: "Revarredura de Dependencias (Trivy)"
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -48,5 +80,5 @@ jobs:
       - name: Notificar em caso de nova vulnerabilidade
         if: failure()
         run: |
-          echo "Uma dependencia estavel ficou vulneravel sem nenhuma mudanca de codigo."
-          echo "Por isso o gatilho agendado existe: o risco muda com o tempo."
+          echo "Uma dependencia anteriormente considerada segura passou a possuir vulnerabilidades conhecidas."
+          echo "O objetivo da vigilancia continua e identificar riscos que surgem ao longo do tempo, mesmo sem alteracoes no codigo."
